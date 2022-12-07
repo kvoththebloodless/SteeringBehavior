@@ -15,6 +15,10 @@ public class PreyBehavior : MonoBehaviour
     public float CIRCLE_DISTANCE = 1;
     public float CIRCLE_RADIUS = 0.3f;
     private float angle = 10;
+    private int waypointindex = 0;
+    private int waypointdirection = 1;
+    [SerializeField]
+    private GameObject path;
     // Start is called before the first frame update
     void Start()
     {
@@ -58,8 +62,8 @@ public class PreyBehavior : MonoBehaviour
     private void SteerSeekAndArrive()
     {
         //SetVelocity(velocity + MovementManager.Seek(velocity, transform.position, positionToGoTo, mass, 0.01f));
-        SetVelocity(velocity + MovementManager.Wander(transform, CIRCLE_DISTANCE, CIRCLE_RADIUS, ref angle, velocity, 0.001f)); ;
-
+        //SetVelocity(velocity + MovementManager.Wander(transform, CIRCLE_DISTANCE, CIRCLE_RADIUS, ref angle, velocity, 0.001f)); ;
+        SetVelocity(velocity + MovementManager.FollowPath(velocity, transform.position, mass, 0.005f, path, ref waypointindex, ref waypointdirection, 1.5f));
 
 
     }

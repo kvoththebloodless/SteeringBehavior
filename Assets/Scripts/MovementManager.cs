@@ -110,6 +110,29 @@ public class MovementManager : MonoBehaviour
 
     }
 
+    public static Vector3 FollowPath(Vector3 velocity, Vector3 currentposition, float mass, float maxforce, GameObject pathparent, ref int waypointindex, ref int direction, float radius)
+    {
+        if ((currentposition - pathparent.transform.GetChild(waypointindex).position).magnitude <= radius)
+        {
+            //should be going from the 0th way point to last or go back.
+            if (waypointindex == pathparent.transform.childCount - 1)
+            {
+                direction = -1;
+            }
+            else if (waypointindex == 0)
+            {
+                direction = 1;
+            }
+
+            //Next waypoint position
+            waypointindex += direction;
+
+        }
+        // seek the next waypoint
+        return Seek(velocity, currentposition, pathparent.transform.GetChild(waypointindex).position, mass, maxforce);
+
+    }
+
     //Taken from some forum
     private static void DrawEllipse(Vector3 pos, Vector3 forward, Vector3 up, float radiusX, float radiusY, int segments, Color color, float duration = 0)
     {
