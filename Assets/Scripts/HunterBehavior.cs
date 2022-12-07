@@ -17,7 +17,7 @@ public class HunterBehavior : MonoBehaviour
     void Start()
     {
         cam = Camera.main;
-        velocity = transform.forward * max_speed;
+
     }
 
     // Update is called once per frame
@@ -34,45 +34,36 @@ public class HunterBehavior : MonoBehaviour
     {
 
 
-        // The wander steering. Think of it as an additional velocity or force. the object wants to wander off of its path so it provides an additional velocity. 
-        var steering = MovementManager.Wander(transform, CIRCLE_DISTANCE, CIRCLE_RADIUS, ref anglerot, velocity);
-
-        //This velocity is added to the existing velocity in a small amount of 0.001f. so that the deviation is little overtime. 
-        // Overtime the small deviations add up to a smooth wander motion. 
-        // tinkering with the circle distance and radius will change how effective the wander is. 
-        // usually increasing distance of circle helps in this setup that I've done. 
-        SetVelocity(velocity + (steering).normalized * 0.0001f);
-
-        transform.position += velocity;
+        SteerWander();
 
     }
 
     private void SteerAroundObstacles()
     {
-        /*    var obstaclepush = MovementManager.ObstacleOffset(transform.position, transform.forward, 6);
-            var obstaclepushx = Vector3.Dot(obstaclepush, transform.right) * transform.right;
-            var obstaclepushz = Vector3.Dot(obstaclepush, transform.forward) * transform.forward;
-            var finalobstaclepush = obstaclepushx + obstaclepushz;
-            velocity += finalobstaclepush;
-            transform.position += velocity;*/
+        Vector3 obstaclepush;
+        MovementManager.ObstacleOffset(out obstaclepush, transform.position, transform.forward, (velocity.magnitude / max_speed) * 1f + 0.1f, 0.02f);
+        SetVelocity(velocity + obstaclepush);
     }
 
     private void SteerPursuit(Vector3 preyvelocity, Vector3 preyposition)
     {
         if (!seek)
         {
-            var steering = MovementManager.Pursuit(preyvelocity, preyposition, velocity, transform.position, mass, max_speed * 3);
-            velocity += steering;
-            transform.position += velocity;
+            var steering = MovementManager.Pursuit(preyvelocity, preyposition, velocity, transform.position, mass, 0.015f);
+            SetVelocity(velocity + steering);
         }
         else
         {
-            var steering = MovementManager.Seek(velocity, transform.position, preyposition, mass, max_speed);
-            velocity += steering;
-            transform.position += velocity;
+            var steering = MovementManager.Seek(velocity, transform.position, preyposition, mass, 0.01f);
+            SetVelocity(velocity + steering);
         }
     }
+    private void SteerWander()
+    {
 
+        SetVelocity(velocity + MovementManager.Wander(transform, CIRCLE_DISTANCE, CIRCLE_RADIUS, ref anglerot, velocity, 0.001f)); ;
+
+    }
     private void OnTriggerStay(Collider other)
     {
 
@@ -80,16 +71,19 @@ public class HunterBehavior : MonoBehaviour
         {
             sawPlayer = true;
             SteerPursuit(other.GetComponent<PreyBehavior>().velocity, other.transform.position);
+            max_speed = 1f;
         }
     }
     private void OnTriggerExit(Collider other)
     {
         sawPlayer = false;
+        max_speed = 0.8f;
     }
     private void SetVelocity(Vector3 velocity)
     {
         this.velocity = Vector3.ClampMagnitude(velocity, max_speed);
         transform.forward = velocity.normalized;
+        transform.position += velocity * Time.deltaTime;
 
     }
 
