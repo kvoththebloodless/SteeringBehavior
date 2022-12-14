@@ -41,8 +41,8 @@ public class HunterBehavior : MonoBehaviour
     private void SteerAroundObstacles()
     {
         Vector3 obstaclepush;
-        MovementManager.ObstacleOffset(out obstaclepush, transform.position, transform.forward, (velocity.magnitude / max_speed) * 1f + 0.1f, 0.02f);
-        SetVelocity(velocity + obstaclepush);
+        //MovementManager.ObstacleOffset(out obstaclepush, transform.position, transform.forward, (velocity.magnitude / max_speed) * 1f + 0.1f, 0.02f);
+        //SetVelocity(velocity + obstaclepush);
     }
 
     private void SteerPursuit(Vector3 preyvelocity, Vector3 preyposition)
