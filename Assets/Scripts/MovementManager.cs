@@ -98,7 +98,7 @@ public class MovementManager : MonoBehaviour
             Debug.DrawRay(position, Quaternion.AngleAxis(+45, Vector3.up) * forward * distance, Color.gray, Time.deltaTime, false);*/
         offset = Vector3.zero;
 
-        var hitst = Physics.Raycast(new Ray(position, velocity.normalized), out hitstraight, distance, LayerMask.GetMask("Obstacles", "Enemy"));
+        var hitst = Physics.Raycast(new Ray(position, velocity.normalized), out hitstraight, distance, LayerMask.GetMask("Obstacles"));
         if (hitst)
         { //THE FOLLOWING COMMENTED CODE IS NOT THE SAME AS HIT.NORMAL CAUSE IT WILL BE FROMT THE CENTER OF THE OBJECT RATHER THAN THE NORMAL WE WANT AT THE POINT
             //WHICH LEADS TO SITUATIONS WHERE SOMETIMES THE OBSTACLE OFFSET VECTOR ENCOURAGES GOING INTO THE WALL RATHER THAN AWAY FROM IT. ESPECIALLY AT CORNERS.
@@ -186,7 +186,6 @@ public class MovementManager : MonoBehaviour
 
         return ConstrainVectorToWorldXAndZ(steering);
     }
-
     private static Vector3 SeparationForce(Transform parent, Transform currentboid, float separationradius, float maxforce)
     {
 

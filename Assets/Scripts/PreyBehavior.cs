@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class PreyBehavior : MonoBehaviour
 {
-    private Vector3 positionToGoTo;
+    public Vector3 positionToGoTo;
     private Camera cam;
     public float max_speed = 0.5f;
     public float max_force = 0.001f;
@@ -38,23 +38,30 @@ public class PreyBehavior : MonoBehaviour
     float separationhordeforce = 0.05f;
     [SerializeField]
     float evadehordeforce = 0.05f;
-
+    [SerializeField]
+    float stoppingforcefactor = 0.05f;
     [SerializeField]
     float distancebehind = 0.1f;
     private PreyBehavior leader;
 
+    private Animator animator;
     // Start is called before the first frame update
     void Start()
     {
         cam = Camera.main;
         positionToGoTo = transform.position;
         leader = transform.parent.GetChild(0).GetComponent<PreyBehavior>();
+        animator = GetComponent<Animator>();
+        if (!iamleader)
+        {
+            max_speed = Random.Range(0.1f, 0.5f);
+        }
     }
 
     // Update is called once per frame
     void Update()
     {
-        if (Input.GetMouseButtonDown(0))
+        if (Input.GetMouseButtonDown(2))
         {
             var ray = Camera.main.ScreenPointToRay(Input.mousePosition);
             RaycastHit hit;
@@ -66,7 +73,7 @@ public class PreyBehavior : MonoBehaviour
         }
         SteerSeekAndArrive();
         SteerAroundObstacles();
-
+        SetAnimatorState();
     }
     private void SteerAroundObstacles()
     {
@@ -78,6 +85,7 @@ public class PreyBehavior : MonoBehaviour
 
 
     }
+
 
     private void SteerFlee(Vector3 positiontoflee)
     {
@@ -91,12 +99,11 @@ public class PreyBehavior : MonoBehaviour
         //SetVelocity(velocity + MovementManager.FollowPath(velocity, transform.position, mass, 0.008f, path, ref waypointindex, ref waypointdirection, 1f));
         if (iamleader)
         {
+            //SetVelocity(velocity + MovementManager.Wander(transform, CIRCLE_DISTANCE, CIRCLE_RADIUS, ref angle, velocity, 0.005f)); ;
             SetVelocity(velocity + MovementManager.Seek(velocity, transform.position, positionToGoTo, mass, seekforce));
         }
         else
         {
-
-
             // Find a point howfarbehind distance behind the leader in the inverse direction of leader's velocity.
             //That's what we need to steer towards primarily.
             var backpositiontoreach = leader.transform.position - (1 * leader.transform.forward * leader.distancebehind);
@@ -129,8 +136,8 @@ public class PreyBehavior : MonoBehaviour
             //adding the deacceleration factor to the hoard vel component every frame
             SetVelocity(velocity + deaccelerationfactor * hoardvel + hoardvel);
 
-            //adding deacceleration factor to the overall velocity. Multiplying by 0.05f for a bit of a gradual decline.
-            SetVelocity(velocity + deaccelerationfactor * velocity * 0.05f);
+            //adding deacceleration factor to the overall velocity. Multiplying by stoppingforcefactor for a bit of a gradual decline.
+            SetVelocity(velocity + deaccelerationfactor * velocity * leader.stoppingforcefactor);
         }
 
     }
@@ -154,8 +161,27 @@ public class PreyBehavior : MonoBehaviour
     {
         this.velocity = Vector3.ClampMagnitude(velocity, max_speed);
 
-        if (this.velocity.magnitude > 0.0001f)
-            transform.forward = Vector3.RotateTowards(transform.forward, velocity.normalized, Time.deltaTime, 0.1f);
+        if (this.velocity.magnitude > 0.001f)
+        {
+
+            if (!iamleader)
+            {
+                transform.forward = Vector3.RotateTowards(transform.forward, velocity.normalized, Time.deltaTime, 0.5f);
+            }
+            else
+            {
+                transform.forward = Vector3.RotateTowards(transform.forward, velocity.normalized, Time.deltaTime, 1f);
+            }
+        }
+        else
+        {
+            if (!iamleader)
+            {
+
+                transform.forward = Vector3.RotateTowards(transform.forward, (leader.transform.position - transform.position).normalized, Time.deltaTime, 0.5f);
+
+            }
+        }
 
         // an unclean check so that past a certain magnitude it's considered stopped
         if (this.velocity.magnitude < 0.001f)
@@ -163,5 +189,11 @@ public class PreyBehavior : MonoBehaviour
             this.velocity = Vector3.zero;
         }
         transform.position += velocity * Time.deltaTime;
+    }
+
+    private void SetAnimatorState()
+    {
+        if (animator)
+            animator.SetFloat("speed", velocity.magnitude / max_speed);
     }
 }
