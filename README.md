@@ -1,4 +1,4 @@
-# SteeeringBehavior
+# SteeringBehavior
 A prototype to implement steering behaviors
 
 The project implements several fundamental steering behaviors.
