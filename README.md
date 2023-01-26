@@ -18,3 +18,7 @@ The project implements several fundamental steering behaviors.
 ## Wandering army following a leader and Obstacle Avoidance
 
 ![wanderarmy](https://user-images.githubusercontent.com/13608668/214386253-cda121c5-1921-4c3e-9a62-3f3c3d3f901c.gif)
+
+## Army following waypoints from 1-7
+
+![waypointfollow](https://user-images.githubusercontent.com/13608668/214731689-b73f0347-f019-44c6-b25c-be8b0181d71d.gif)
